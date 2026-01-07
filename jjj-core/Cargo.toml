@@ -1,0 +1,16 @@
+[package]
+name = "jjj-core"
+version = "0.1.0"
+edition = "2024"
+
+#核心
+[lib]
+name="jjj_core"
+path="src/lib.rs"
+
+# 终端环境
+[[bin]]
+name="jjj_core"
+path="src/main.rs"
+
+[dependencies]
