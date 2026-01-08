@@ -86,8 +86,8 @@ impl Account {
             };
             let sleep_duration = std::time::Duration::from_secs(duration.num_seconds() as u64);
             callbak(CallbakEvent::Log(format!(
-                "下次签到时间[{}]，还有[{}]秒",
-                tomorrow,
+                "等待下次签到时间[{}]，还有[{}]秒",
+                tomorrow.format("%Y-%m-%d %H:%M:%S"),
                 sleep_duration.as_secs()
             )));
             std::thread::sleep(sleep_duration);

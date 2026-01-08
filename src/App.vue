@@ -1,160 +1,340 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
-const greetMsg = ref("");
-const name = ref("");
+const TOKEN_STORAGE_KEY = "jjj_token";
 
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
-}
+// 从 localStorage 读取 token
+const loadTokenFromStorage = () => {
+  try {
+    const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    return savedToken || "";
+  } catch (error) {
+    console.error("读取 token 失败:", error);
+    return "";
+  }
+};
+
+// 保存 token 到 localStorage
+const saveTokenToStorage = (tokenValue) => {
+  try {
+    if (tokenValue && tokenValue.trim()) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, tokenValue);
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  } catch (error) {
+    console.error("保存 token 失败:", error);
+  }
+};
+
+const token = ref(loadTokenFromStorage());
+const isRunning = ref(false);
+const logs = ref([
+  "请输入 Token 后点击启动按钮"
+]);
+
+// 监听 token 变化并保存到 localStorage
+watch(token, (newValue) => {
+  saveTokenToStorage(newValue);
+});
+
+// 添加日志函数
+const addLog = (message) => {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("zh-CN", { 
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+  logs.value.push(`[${timeStr}] ${message}`);
+  
+  // 自动滚动到底部
+  nextTick(() => {
+    const consoleContent = document.querySelector(".console-content");
+    if (consoleContent) {
+      consoleContent.scrollTop = consoleContent.scrollHeight;
+    }
+  });
+};
+
+// 启动签到或退出程序
+const startSignin = async () => {
+  // 如果正在运行，则退出程序
+  if (isRunning.value) {
+    try {
+      await invoke("exit_app");
+    } catch (error) {
+      addLog(`退出失败: ${error}`);
+    }
+    return;
+  }
+
+  if (!token.value.trim()) {
+    addLog("错误: Token 不能为空");
+    return;
+  }
+
+  try {
+    isRunning.value = true;
+    addLog("正在启动签到服务...");
+    
+    await invoke("start_signin", { token: token.value });
+    addLog("签到服务启动成功");
+  } catch (error) {
+    isRunning.value = false;
+    addLog(`启动失败: ${error}`);
+  }
+};
+
+// 监听日志事件
+let unlistenLog = null;
+
+onMounted(async () => {
+  // 监听来自后端的日志事件
+  unlistenLog = await listen("log", (event) => {
+    addLog(event.payload);
+  });
+});
+
+onUnmounted(() => {
+  // 清理事件监听
+  if (unlistenLog) {
+    unlistenLog();
+  }
+});
 </script>
 
 <template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
-
-    <div class="row">
-      <a href="https://vite.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
+  <main class="app-container">
+    <!-- Token 输入区域 -->
+    <div class="token-section">
+      <label class="token-label">Token</label>
+      <input 
+        v-model="token" 
+        type="password"
+        class="token-input" 
+        placeholder="请输入您的 Token"
+      />
     </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
 
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
+    <!-- 控制台区域 -->
+    <div class="console-section">
+      <div class="console-header">
+        <span class="console-title">控制台</span>
+      </div>
+      <div class="console-content" ref="consoleContent">
+        <div 
+          v-for="(log, index) in logs" 
+          :key="index" 
+          class="log-line"
+        >
+          <span class="log-text">{{ log }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 启动按钮 -->
+    <div class="action-section">
+      <button 
+        class="start-button" 
+        :class="{ 'running': isRunning }"
+        @click="startSignin"
+      >
+        {{ isRunning ? '运行中，点击退出' : '启动' }}
+      </button>
+    </div>
   </main>
 </template>
 
 <style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-
-</style>
-<style>
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
+.app-container {
+  width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  overflow: hidden;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
+/* Token 输入区域 */
+.token-section {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
+.token-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
 }
 
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
+.token-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #2d3748;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
   outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-#greet-input {
-  margin-right: 5px;
+.token-input::placeholder {
+  color: #a0aec0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.token-input:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
+/* 控制台区域 */
+.console-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 12px;
+  margin-bottom: 8px;
+  background: #1a202c;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.console-header {
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.console-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.console-content {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.console-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.console-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.console-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.console-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.log-line {
+  margin-bottom: 4px;
+  color: #e2e8f0;
+  word-break: break-word;
+}
+
+.log-text {
+  color: #cbd5e0;
+}
+
+/* 启动按钮区域 */
+.action-section {
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.start-button {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  letter-spacing: 0.5px;
+}
+
+.start-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.start-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.start-button:focus {
+  outline: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4), 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.start-button.running {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+}
+
+.start-button.running:hover {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+  box-shadow: 0 6px 16px rgba(229, 62, 62, 0.5);
+}
+
+.start-button.running:active {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.4);
+}
+</style>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+}
 </style>
