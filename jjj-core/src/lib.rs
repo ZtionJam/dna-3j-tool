@@ -85,11 +85,11 @@ impl Account {
                 tomorrow + chrono::Duration::days(1) - now
             };
             let sleep_duration = std::time::Duration::from_secs(duration.num_seconds() as u64);
-            log(&format!(
+            callbak(CallbakEvent::Log(format!(
                 "下次签到时间[{}]，还有[{}]秒",
                 tomorrow,
                 sleep_duration.as_secs()
-            ));
+            )));
             std::thread::sleep(sleep_duration);
             self.auth_and_signin(&callbak);
         }

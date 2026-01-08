@@ -33,6 +33,9 @@ fn main() {
         CallbakEvent::UserSigninFail(msg) => {
             log(&format!("社区签到失败: {}", msg));
         }
+        CallbakEvent::Log(msg) => {
+            log(&msg);
+        }
     });
 }
 

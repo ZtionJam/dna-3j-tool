@@ -22,6 +22,8 @@ pub enum CallbakEvent {
     UserSigninFail(String),
     /// 刷新Token失败
     Fail(String),
+    //输出下日志
+    Log(String),
 }
 pub trait ExitExpect<T, E: Display> {
     fn exit_expect(self, msg: &str) -> T;
