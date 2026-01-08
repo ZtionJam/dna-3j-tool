@@ -22,6 +22,16 @@
 
 ### CLI 使用方法
 
+
+#### Docker（推荐）
+```bash
+docker pull ztionjam/jjj-cli:latest
+
+#后台运行 （powershell环境用;替代&&） 
+docker run -d --rm --name jjj ztionjam/jjj-cli:latest --token 你的Token && docker logs -f jjj
+
+#docker-compose同理
+```
 #### Windows
 
 ```bash

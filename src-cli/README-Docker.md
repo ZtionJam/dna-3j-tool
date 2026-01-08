@@ -16,9 +16,7 @@ docker run --rm jjj-cli:latest
 
 # 运行并传递 token 参数
 docker run --rm jjj-cli:latest --token YOUR_TOKEN
+
+# 后台运行
+docker run -d --rm jjj-cli:latest --token YOUR_TOKEN
 ```
-
-## 使用 Docker Compose（可选）
-
-你也可以创建一个 `docker-compose.yml` 文件来简化使用。
-

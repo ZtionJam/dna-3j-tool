@@ -1,7 +1,7 @@
 # 多阶段构建 Dockerfile for jjj-cli
 
 # 构建阶段
-FROM rust:1.75-slim as builder
+FROM rust:latest as builder
 
 # 安装必要的构建依赖
 RUN apt-get update && apt-get install -y \
@@ -12,17 +12,6 @@ RUN apt-get update && apt-get install -y \
 
 # 设置工作目录
 WORKDIR /app
-
-# 复制 Cargo 文件以利用 Docker 缓存
-COPY jjj-core/Cargo.toml jjj-core/Cargo.lock ./jjj-core/
-COPY src-cli/Cargo.toml src-cli/Cargo.lock ./src-cli/
-
-# 创建虚拟项目以缓存依赖
-RUN mkdir -p jjj-core/src src-cli/src && \
-    echo "fn main() {}" > src-cli/src/main.rs && \
-    echo "pub fn dummy() {}" > jjj-core/src/lib.rs && \
-    cargo build --release --manifest-path src-cli/Cargo.toml && \
-    rm -rf jjj-core/src src-cli/src
 
 # 复制源代码
 COPY jjj-core/ ./jjj-core/
