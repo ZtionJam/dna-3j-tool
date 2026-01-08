@@ -1,6 +1,7 @@
 # DNA-3J-Tool / 皎皎角签到工具
 
 用于《二重螺旋》游戏社区《皎皎角》的自动签到工具，支持社区签到和角色签到功能。
+<br/>
 本文档由AI生成
 ## 📋 项目简介
 
@@ -11,14 +12,14 @@
 ## 🎯 当前状态
 
 - ✅ **CLI 控制台版本** - OK
-- 🚧 **桌面版本** - 计划中 Tauri2
+- ✅ **桌面版本** - OK
 - 🚧 **安卓版本** - 计划中 Tauri2
 
 ## 🚀 快速开始
 
 ### 下载预编译版本
 
-在 [Releases](https://github.com/your-username/dna-3j-tool/releases) 页面下载对应平台的 CLI 版本。
+在 [Releases](https://github.com/your-username/dna-3j-tool/releases) 页面下载对应平台的版本。
 
 ### CLI 使用方法
 
