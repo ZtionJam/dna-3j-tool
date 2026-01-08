@@ -28,38 +28,43 @@ impl Account {
         match api::auth(self.refresh_token.clone()) {
             Ok(new_token) => {
                 self.token = new_token;
-                if let Ok(info) = get_user_have_signin_new(self.token.clone()) {
-                    if info.have_sign_in && info.have_role_sign_in {
-                        callbak(CallbakEvent::SigninOver);
-                    }
-                    if !info.have_role_sign_in {
-                        match api::role_signin(self.token.clone()) {
-                            Ok(da) => {
-                                callbak(CallbakEvent::RoleSigninOk(da));
+                match get_user_have_signin_new(self.token.clone()) {
+                    Ok(info) => {
+                        if info.have_sign_in && info.have_role_sign_in {
+                            callbak(CallbakEvent::SigninOver);
+                        }
+                        if !info.have_role_sign_in {
+                            match api::role_signin(self.token.clone()) {
+                                Ok(da) => {
+                                    callbak(CallbakEvent::RoleSigninOk(da));
+                                }
+                                Err(e) => {
+                                    callbak(CallbakEvent::RoleSigninFail(e));
+                                }
                             }
-                            Err(e) => {
-                                callbak(CallbakEvent::RoleSigninFail(e));
+                        } else {
+                            callbak(CallbakEvent::RoleSigninFail("角色今日已签到".to_string()));
+                        }
+                        if !info.have_sign_in {
+                            match api::user_signin(self.token.clone()) {
+                                Ok(m) => {
+                                    callbak(CallbakEvent::UserSigninOk(m));
+                                }
+                                Err(e) => {
+                                    callbak(CallbakEvent::UserSigninFail(e));
+                                }
                             }
+                        } else {
+                            callbak(CallbakEvent::UserSigninFail("社区今日已签到".to_string()));
                         }
                     }
-                    if !info.have_sign_in {
-                        match api::user_signin(self.token.clone()) {
-                            Ok(m) => {
-                                callbak(CallbakEvent::UserSigninOk(m));
-                            }
-                            Err(e) => {
-                                callbak(CallbakEvent::UserSigninFail(e));
-                            }
-                        }
+                    Err(e) => {
+                        callbak(CallbakEvent::Fail(format!("查询签到失败: {}", e)));
                     }
                 }
             }
             Err(e) => {
-                log(&format!("刷新Token失败: {}", e));
-                callbak(CallbakEvent::TokenRefreshFail(format!(
-                    "刷新Token失败: {}",
-                    e
-                )));
+                callbak(CallbakEvent::Fail(format!("刷新Token失败: {}", e)));
             }
         }
     }

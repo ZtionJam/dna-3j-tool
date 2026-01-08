@@ -3,7 +3,7 @@ use std::{fmt::Display, process};
 use chrono::Local;
 
 use crate::api::DayAward;
-
+use crate::api::UserSign;
 pub fn log(msg: &str) {
     println!("[{}] -> {}", Local::now().format("%Y-%m-%d %H:%M:%S"), msg);
 }
@@ -17,11 +17,11 @@ pub enum CallbakEvent {
     /// 角色签到失败
     RoleSigninFail(String),
     /// 社区签到成功
-    UserSigninOk(String),
+    UserSigninOk(UserSign),
     /// 社区签到失败
     UserSigninFail(String),
     /// 刷新Token失败
-    TokenRefreshFail(String),
+    Fail(String),
 }
 pub trait ExitExpect<T, E: Display> {
     fn exit_expect(self, msg: &str) -> T;
