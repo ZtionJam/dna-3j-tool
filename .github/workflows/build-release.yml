@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'  # 匹配所有以 v 开头的 tag，例如 v1.0.0
 
+permissions:
+  contents: write
+
 jobs:
   build-cli-linux:
     name: Build CLI (Linux)
@@ -161,6 +164,8 @@ jobs:
     needs: [build-cli-linux, build-cli-windows, build-desktop-linux, build-desktop-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
