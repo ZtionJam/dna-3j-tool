@@ -181,8 +181,8 @@ jobs:
           files: |
             artifacts/jjj-cli-linux/jjj-cli
             artifacts/jjj-cli-windows/jjj-cli.exe
-            artifacts/dna-3j-tool-linux/**/*
-            artifacts/dna-3j-tool-windows/**/*
+#            artifacts/dna-3j-tool-linux/**/*
+#            artifacts/dna-3j-tool-windows/**/*
           draft: false
           prerelease: false
         env:
