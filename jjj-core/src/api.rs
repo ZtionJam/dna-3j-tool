@@ -3,10 +3,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 ///
+/// 目前未找到刷新token的接口，先直接用token
 /// 从刷新token获取token
 ///
-pub fn auth(_refresh_token: String) -> Result<String, String> {
-    Ok("eyJhbGciOiJIUzUxMiJ9.eyJjcmVhdGVkIjoxNzY2MjQzMDA1Mzg3LCJ1c2VySWQiOjc2Njc0Njg1OTM4ODUzNTMwMX0.gAg2JTx4AXYWA0zuO_Kk2Klpu4eRVtZ_1GVSwpANbemhY9wMeS8K8bUSd-xggbU3EHrmrwnOZpbuuxcdvMrXpA".to_string())
+pub fn auth(refresh_token: String) -> Result<String, String> {
+    Ok(refresh_token.clone())
     // Err("刷新token失败".to_string())
 }
 
@@ -52,7 +53,6 @@ pub fn role_signin(token: String) -> Result<DayAward, String> {
             ("periodId".to_string(), encourage.period.id.to_string()),
         ],
     )?;
-    println!("jiangliang debug: {:?}", role_sign);
     if role_sign.send_day_award {
         return Ok(day_award.clone());
     }

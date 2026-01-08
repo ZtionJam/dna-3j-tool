@@ -1,7 +1,15 @@
+use clap::Parser;
 use jjj_core::{util::*, *};
 
+///
+/// Usage: jjj-cli.exe --token <TOKEN>
+/// Options:
+///   -t, --token <TOKEN>  皎皎角的token,目前还没有找到刷新token接口，先直接用token
+///
 fn main() {
-    let mut acc = Account::new("your_refresh_token_here".to_string()).exit_expect("启动失败");
+    let cli = Cli::parse();
+
+    let mut acc = Account::new(cli.token).exit_expect("启动失败");
     log("程序启动成功");
     acc.run_loop(|e| match e {
         CallbakEvent::SigninOver => {
@@ -26,4 +34,16 @@ fn main() {
             log(&format!("社区签到失败: {}", msg));
         }
     });
+}
+
+#[derive(Parser, Debug)]
+#[command(author="ZtionJam", version="0.1.0", about = "皎皎角签到工具", long_about = None)]
+struct Cli {
+    #[arg(
+        short = 't',
+        long = "token",
+        required = true,
+        help = "皎皎角的token,目前还没有找到刷新token接口，先直接用token"
+    )]
+    token: String,
 }
