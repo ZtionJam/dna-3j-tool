@@ -19,7 +19,7 @@
 
 ### 桌面版使用方法
 
-  -在 [Releases](https://github.com/your-username/dna-3j-tool/releases)下载对应平台的安装包运行
+  -在 [Releases](https://github.com/ztionjam/dna-3j-tool/releases)下载对应平台的安装包运行
 
 
 ### CLI 使用方法
@@ -54,7 +54,7 @@ docker-compose up -d && docker-compose logs -f jjj
 
 #### 下载预编译版本
 
-在 [Releases](https://github.com/your-username/dna-3j-tool/releases) 页面下载对应平台的 CLI 版本。
+在 [Releases](https://github.com/ztionjam/dna-3j-tool/releases) 页面下载对应平台的 CLI 版本。
 
 #### Windows
 
