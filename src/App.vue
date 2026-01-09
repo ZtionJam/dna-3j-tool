@@ -5,7 +5,7 @@ import { listen } from "@tauri-apps/api/event";
 import { openUrl  } from "@tauri-apps/plugin-opener";
 
 const TOKEN_STORAGE_KEY = "jjj_token";
-const CURRENT_VERSION = "0.0.4"; // 当前版本号，需要与 tauri.conf.json 中的版本保持一致
+const CURRENT_VERSION = "0.1.0"; // 当前版本号，需要与 tauri.conf.json 中的版本保持一致
 const GITHUB_REPO = "ZtionJam/dna-3j-tool";
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 const GITHUB_RELEASE_URL = `https://github.com/${GITHUB_REPO}/releases/latest`;
@@ -16,12 +16,12 @@ const loadTokenFromStorage = () => {
     const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
     return savedToken || "";
   } catch (error) {
-    console.error("读取 token 失败:", error);
+    console.error("读取 refreshToken 失败:", error);
     return "";
   }
 };
 
-// 保存 token 到 localStorage
+// 保存 refreshToken 到 localStorage
 const saveTokenToStorage = (tokenValue) => {
   try {
     if (tokenValue && tokenValue.trim()) {
@@ -30,7 +30,7 @@ const saveTokenToStorage = (tokenValue) => {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
   } catch (error) {
-    console.error("保存 token 失败:", error);
+    console.error("保存 refreshToken 失败:", error);
   }
 };
 
@@ -39,7 +39,7 @@ const isRunning = ref(false);
 const showUpdateDialog = ref(false);
 const latestVersion = ref("");
 const logs = ref([
-  "请输入 Token 后点击启动按钮"
+  "请输入 refreshToken 后点击启动按钮"
 ]);
 
 // 监听 token 变化并保存到 localStorage
@@ -80,7 +80,7 @@ const startSignin = async () => {
   }
 
   if (!token.value.trim()) {
-    addLog("错误: Token 不能为空");
+    addLog("错误: refreshToken 不能为空");
     return;
   }
 
@@ -177,12 +177,12 @@ onUnmounted(() => {
   <main class="app-container">
     <!-- Token 输入区域 -->
     <div class="token-section">
-      <label class="token-label">Token</label>
+      <label class="token-label">RefreshToken</label>
       <input 
         v-model="token" 
         type="password"
         class="token-input" 
-        placeholder="请输入您的 Token"
+        placeholder="请输入您的 refreshToken"
       />
     </div>
 

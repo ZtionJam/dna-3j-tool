@@ -3,11 +3,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 ///
-/// 目前未找到刷新token的接口，先直接用token
 /// 从刷新token获取token
 ///
 pub fn auth(refresh_token: String) -> Result<String, String> {
-    Ok(refresh_token.clone())
+    let refresh: RefreshToken = post(
+        refresh_token.clone(),
+        request::REFRESH_TOKEN,
+        &[("refreshToken".to_string(), refresh_token.clone())],
+    )?;
+    Ok(refresh.token)
     // Err("刷新token失败".to_string())
 }
 
@@ -97,6 +101,7 @@ mod request {
     pub const USER_HAVE_SIGN_IN_NEW: &str = "https://dnabbs-api.yingxiong.com/user/haveSignInNew";
     pub const USER_SIGNIN: &str = "https://dnabbs-api.yingxiong.com/user/signIn";
     pub const ENCOURAGE_SIGNIN: &str = "https://dnabbs-api.yingxiong.com/encourage/signin/signin";
+    pub const REFRESH_TOKEN: &str = "https://dnabbs-api.yingxiong.com/user/refreshToken";
 
     pub fn get_header(token: String) -> reqwest::header::HeaderMap {
         let mut headers = reqwest::header::HeaderMap::new();
@@ -136,6 +141,13 @@ pub fn post<T: for<'de> Deserialize<'de>>(
         serde_json::from_value(res.get("data").ok_or(format!("data不存在{}", res))?.clone())
             .map_err(|e| format!("格式化失败: {}", e))?,
     )
+}
+
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RefreshToken {
+    pub token: String
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,15 +1,15 @@
 use clap::Parser;
 use jjj_core::{util::*, *};
 
+///皎皎角签到工具
+/// Usage: jjj-cli.exe --refresh-token <REFRESH_TOKEN>
 ///
-/// Usage: jjj-cli.exe --token <TOKEN>
 /// Options:
-///   -t, --token <TOKEN>  皎皎角的token,目前还没有找到刷新token接口，先直接用token
-///
+///  -t, --refresh-token <REFRESH_TOKEN>  皎皎角的refresh token
 fn main() {
     let cli = Cli::parse();
 
-    let mut acc = Account::new(cli.token).exit_expect("启动失败");
+    let mut acc = Account::new(cli.refresh_token).exit_expect("启动失败");
     log("程序启动成功");
     acc.run_loop(|e| match e {
         CallbakEvent::SigninOver => {
@@ -44,9 +44,9 @@ fn main() {
 struct Cli {
     #[arg(
         short = 't',
-        long = "token",
+        long = "refresh-token",
         required = true,
-        help = "皎皎角的token,目前还没有找到刷新token接口，先直接用token"
+        help = "皎皎角的refresh token"
     )]
-    token: String,
+    refresh_token: String,
 }

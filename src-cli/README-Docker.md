@@ -15,8 +15,8 @@ docker build -f src-cli/Dockerfile -t ztionjam/jjj-cli:latest -t ztionjam/jjj-cl
 docker run --rm ztionjam/jjj-cli:latest
 
 # 运行并传递 token 参数
-docker run --rm ztionjam/jjj-cli:latest --token YOUR_TOKEN
+docker run --rm ztionjam/jjj-cli:latest --refresh-token YOUR_TOKEN
 
 # 后台运行
-docker run -d --rm ztionjam/jjj-cli:latest --token YOUR_TOKEN
+docker run -d --rm ztionjam/jjj-cli:latest --refresh-token YOUR_TOKEN
 ```
