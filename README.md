@@ -88,7 +88,7 @@ jjj-cli.exe --refresh-token YOUR_TOKEN
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/dna-3j-tool.git
+git clone https://github.com/ztionjam/dna-3j-tool.git
 cd dna-3j-tool
 
 # 构建 CLI
@@ -101,7 +101,7 @@ cargo build --release
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/dna-3j-tool.git
+git clone https://github.com/ztionjam/dna-3j-tool.git
 cd dna-3j-tool
 
 # 构建
