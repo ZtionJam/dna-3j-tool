@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use chrono::Local;
 use chrono::NaiveTime;
 use chrono::TimeZone;
@@ -74,7 +76,8 @@ impl Account {
         loop {
             let now = Local::now();
             let tomorrow_date = now.date_naive() + chrono::Duration::days(1);
-            let exec_time = NaiveTime::from_hms_opt(2, 15, 0).expect("无效的时分秒");
+            // let tomorrow_date = now.date_naive();
+            let exec_time = NaiveTime::from_hms_opt(5, 30, 50).expect("无效的时分秒");
             let tomorrow = Local
                 .from_local_datetime(&tomorrow_date.and_time(exec_time))
                 .unwrap();
@@ -84,13 +87,13 @@ impl Account {
             } else {
                 tomorrow + chrono::Duration::days(1) - now
             };
-            let sleep_duration = std::time::Duration::from_secs(duration.num_seconds() as u64);
+            let sleep_duration = std::time::Duration::from_secs(duration.num_seconds() as u64); 
             callbak(CallbakEvent::Log(format!(
-                "等待下次签到时间[{}]，还有[{}]秒",
+                "等待下次签到时间[{}]，[{}]秒后",
                 tomorrow.format("%Y-%m-%d %H:%M:%S"),
                 sleep_duration.as_secs()
             )));
-            std::thread::sleep(sleep_duration);
+            std::thread::sleep(sleep_duration + std::time::Duration::from_secs(1));
             self.auth_and_signin(&callbak);
         }
     }

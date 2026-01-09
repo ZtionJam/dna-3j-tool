@@ -23,9 +23,13 @@ RUN cargo build --release --manifest-path src-cli/Cargo.toml
 # 运行阶段
 FROM debian:bookworm-slim
 
-# 安装运行时依赖
+
+# 安装运行时依赖 + 配置中国时区(Asia/Shanghai)
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    tzdata \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && rm -rf /var/lib/apt/lists/*
 
 # 创建非 root 用户
